@@ -4,31 +4,21 @@
   <title>Sketch Race Tracker</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <style>
-    body { background:#f2f5fa; font-family:'Segoe UI',Arial,sans-serif; margin:0; padding:0 0 24px;}
-    .container { max-width:900px; margin:32px auto; padding:24px; background:#fff; border-radius:16px;
-      box-shadow:0 4px 18px rgba(70,100,150,0.07),0 1.5px 4px rgba(70,100,150,0.05);}
-    h1 { text-align:center; color:#2966a6;}
-    h2 { color:#2979a8; margin-top:16px; margin-bottom:6px;}
-    .info-bubble { background:#eaf3fb; color:#15597c; border-radius:20px; padding:6px 16px; font-size:0.98em;
-      display:inline-block; margin-bottom:16px;}
-    .section { background:#f9fbfd; border-radius:12px; margin-bottom:28px; padding:18px; 
-      box-shadow:0 2px 8px rgba(70,100,150,0.04);}
+    /* Styling omitted for brevity, use previous working styles */
+    body { background:#f2f5fa; font-family:sans-serif; margin:0; padding:0 0 24px;}
+    .container { max-width:900px; margin:32px auto; padding:24px; background:#fff; border-radius:16px; box-shadow:0 4px 18px rgba(70,100,150,0.07),0 1.5px 4px rgba(70,100,150,0.05);}
+    .info-bubble { background:#eaf3fb; color:#15597c; border-radius:20px; padding:6px 16px; font-size:0.98em; display:inline-block; margin-bottom:16px;}
+    .section { background:#f9fbfd; border-radius:12px; margin-bottom:28px; padding:18px; box-shadow:0 2px 8px rgba(70,100,150,0.04);}
     .form-row { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:14px;}
     .form-group { display:flex; flex-direction:column; flex:1 1 200px;}
-    input, select, textarea { padding:7px 9px; border-radius:6px; border:1.3px solid #bed5ec;
-      font-size:1em; background:#f6fafd;}
+    input, select, textarea { padding:7px 9px; border-radius:6px; border:1.3px solid #bed5ec; font-size:1em; background:#f6fafd;}
     input:focus, select:focus, textarea:focus { border-color:#2979a8; outline:none; background:#edf6ff;}
     .crew-list,.sail-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:12px;}
     .current-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:7px; align-items:end;}
-    button { background:#2979a8; color:white; border:none; border-radius:6px; padding:8px 18px;
-      font-size:1em; font-weight:500; cursor:pointer;}
+    button { background:#2979a8; color:white; border:none; border-radius:6px; padding:8px 18px; font-size:1em; font-weight:500; cursor:pointer;}
     button:hover { background:#175477;}
-    @media (max-width:700px) {
-      .container { padding:10px;}
-      .form-row, .current-row { flex-direction:column; gap:7px;}
-    }
+    @media (max-width:700px) { .container { padding:10px;} .form-row, .current-row { flex-direction:column; gap:7px;}}
   </style>
 </head>
 <body>
@@ -37,9 +27,8 @@
   <h1>Sketch Race Tracker</h1>
   <form id="raceForm">
 
-    <!-- Race Info -->
     <div class="section">
-      <div class="info-bubble">Enter race details. All race records go to Google Sheets.</div>
+      <div class="info-bubble">Enter race details. Records go straight to your Google Sheet.</div>
       <div class="form-row">
         <div class="form-group">
           <label>Race Name:</label>
@@ -99,7 +88,7 @@
 
     <!-- Crew -->
     <div class="section">
-      <div class="info-bubble">Select crew or add new members.</div>
+      <div class="info-bubble">Select or add crew members.</div>
       <div id="crewList" class="crew-list"></div>
       <div class="form-row">
         <input type="text" id="newCrewInput" placeholder="Add new crew member">
@@ -109,7 +98,7 @@
 
     <!-- Sails -->
     <div class="section">
-      <div class="info-bubble">Select sails used or add new ones.</div>
+      <div class="info-bubble">Select or add sails used for this race.</div>
       <div id="sailList" class="sail-list"></div>
       <div class="form-row">
         <input type="text" id="newSailDesc" placeholder="Sail Description">
@@ -120,7 +109,7 @@
 
     <!-- Currents -->
     <div class="section">
-      <div class="info-bubble">Log up to four current/tide observations at Golden Gate Bridge.</div>
+      <div class="info-bubble">Log up to four currents/tide observations at Golden Gate Bridge.</div>
       <div id="currentsSection"></div>
     </div>
 
@@ -129,11 +118,11 @@
 </div>
 
 <script>
-// CREW LIST
+// --- CREW MODULE ---
 function loadCrewList(){
-  let crew = JSON.parse(localStorage.getItem('crewList') || '[]');
+  let crew=JSON.parse(localStorage.getItem('crewList')||'[]');
   let cDiv = document.getElementById('crewList');
-  cDiv.innerHTML = '';
+  cDiv.innerHTML='';
   crew.forEach(name=>{
     let label=document.createElement('label');
     let cb=document.createElement('input');
@@ -157,9 +146,9 @@ document.getElementById('addCrewBtn').onclick=()=>{
   document.getElementById('newCrewInput').value='';
 };
 
-// SAIL LIST
+// --- SAIL MODULE ---
 function loadSailList(){
-  let sails=JSON.parse(localStorage.getItem('sailList') || '[]');
+  let sails=JSON.parse(localStorage.getItem('sailList')||'[]');
   let sDiv=document.getElementById('sailList');
   sDiv.innerHTML='';
   sails.forEach((sail,idx)=>{
@@ -172,16 +161,14 @@ function loadSailList(){
     label.appendChild(cb);
     label.appendChild(document.createTextNode(` ${sail.desc} (${sail.code})`));
     let remove=document.createElement('button');
-    remove.type='button';
-    remove.textContent='Remove';
+    remove.type='button'; remove.textContent='Remove';
     remove.style.marginLeft='8px';
     remove.onclick=()=>{
       sails.splice(idx,1);
       localStorage.setItem('sailList', JSON.stringify(sails));
       loadSailList();
     };
-    row.appendChild(label);
-    row.appendChild(remove);
+    row.appendChild(label); row.appendChild(remove);
     sDiv.appendChild(row);
   });
 }
@@ -198,7 +185,7 @@ document.getElementById('addSailBtn').onclick=()=>{
   document.getElementById('newSailCode').value='';
 };
 
-// CURRENTS
+// --- CURRENTS MODULE ---
 function renderCurrentsSection(){
   const container=document.getElementById('currentsSection');
   const types=['slack','ebb','flood'];
@@ -218,7 +205,7 @@ function renderCurrentsSection(){
   }
 }
 
-// FORM SUBMIT TO GOOGLE SHEETS
+// --- GOOGLE SHEETS SUBMIT ---
 document.getElementById('raceForm').onsubmit=async function(e){
   e.preventDefault();
   let data={};
@@ -240,7 +227,7 @@ document.getElementById('raceForm').onsubmit=async function(e){
     if(t||ty||s) data.currents.push({time:t, type:ty, speed:s});
   }
 
-  const webhookUrl="https://script.google.com/macros/s/AKfycbxhVe_kQVe8HwcOsuD3ncEuSbwMnwybWX_1Gu8CwIKX4ItYs3PxzoDk0NLhJHfHG5OL/exec";
+  const webhookUrl="https://script.google.com/macros/s/AKfycbyHdKpvjWYnqqW1rp2nGQLWmy-A6C2HpngShAgXCh1mqCuuzTtRFPPt51aBZrIGySZR/exec";
   try{
     let resp=await fetch(webhookUrl,{
       method:'POST',
@@ -261,13 +248,12 @@ document.getElementById('raceForm').onsubmit=async function(e){
   }
 };
 
-// INIT ON PAGE LOAD
+// --- ON PAGE LOAD ---
 document.addEventListener('DOMContentLoaded',()=>{
   loadCrewList();
   loadSailList();
   renderCurrentsSection();
 });
 </script>
-
 </body>
 </html>
