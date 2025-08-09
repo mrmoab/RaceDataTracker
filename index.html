@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sketch Race Tracker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body { background:#f2f5fa; font-family:'Segoe UI',Arial,sans-serif; margin:0; padding:0 0 24px;}
+    .container { max-width:900px; margin:32px auto; padding:24px; background:#fff; border-radius:16px;
+      box-shadow:0 4px 18px rgba(70,100,150,0.07),0 1.5px 4px rgba(70,100,150,0.05);}
+    h1 { text-align:center; color:#2966a6;}
+    h2 { color:#2979a8; margin-top:16px; margin-bottom:6px;}
+    .info-bubble { background:#eaf3fb; color:#15597c; border-radius:20px; padding:6px 16px; font-size:0.98em;
+      display:inline-block; margin-bottom:16px;}
+    .section { background:#f9fbfd; border-radius:12px; margin-bottom:28px; padding:18px; 
+      box-shadow:0 2px 8px rgba(70,100,150,0.04);}
+    .form-row { display:flex; flex-wrap:wrap; gap:16px; margin-bottom:14px;}
+    .form-group { display:flex; flex-direction:column; flex:1 1 200px;}
+    input, select, textarea { padding:7px 9px; border-radius:6px; border:1.3px solid #bed5ec;
+      font-size:1em; background:#f6fafd;}
+    input:focus, select:focus, textarea:focus { border-color:#2979a8; outline:none; background:#edf6ff;}
+    .crew-list,.sail-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; margin-bottom:12px;}
+    .current-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:7px; align-items:end;}
+    button { background:#2979a8; color:white; border:none; border-radius:6px; padding:8px 18px;
+      font-size:1em; font-weight:500; cursor:pointer;}
+    button:hover { background:#175477;}
+    @media (max-width:700px) {
+      .container { padding:10px;}
+      .form-row, .current-row { flex-direction:column; gap:7px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Sketch Race Tracker</h1>
+  <form id="raceForm">
+
+    <!-- Race Info -->
+    <div class="section">
+      <div class="info-bubble">Enter race details. All race records go to Google Sheets.</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Race Name:</label>
+          <input type="text" name="raceName" required>
+        </div>
+        <div class="form-group">
+          <label>Date:</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label>Organizing Authority:</label>
+          <input type="text" name="organizingAuthority">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Location:</label>
+          <input type="text" name="location" required>
+        </div>
+        <div class="form-group">
+          <label>Start Time:</label>
+          <input type="time" name="startTime">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Race Type:</label>
+          <select name="raceType" required>
+            <option value="">--Select--</option>
+            <option value="Handicap">Handicap</option>
+            <option value="One Design">One Design</option>
+            <option value="Pursuit">Pursuit</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Weather:</label>
+          <input type="text" name="weather">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Boat Raced:</label>
+          <input type="text" name="boatRaced">
+        </div>
+        <div class="form-group">
+          <label>Results:</label>
+          <input type="text" name="results">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex:2">
+          <label>Notes:</label>
+          <textarea name="notes" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crew -->
+    <div class="section">
+      <div class="info-bubble">Select crew or add new members.</div>
+      <div id="crewList" class="crew-list"></div>
+      <div class="form-row">
+        <input type="text" id="newCrewInput" placeholder="Add new crew member">
+        <button type="button" id="addCrewBtn">Add Crew</button>
+      </div>
+    </div>
+
+    <!-- Sails -->
+    <div class="section">
+      <div class="info-bubble">Select sails used or add new ones.</div>
+      <div id="sailList" class="sail-list"></div>
+      <div class="form-row">
+        <input type="text" id="newSailDesc" placeholder="Sail Description">
+        <input type="text" id="newSailCode" placeholder="Call Code">
+        <button type="button" id="addSailBtn">Add Sail</button>
+      </div>
+    </div>
+
+    <!-- Currents -->
+    <div class="section">
+      <div class="info-bubble">Log up to four current/tide observations at Golden Gate Bridge.</div>
+      <div id="currentsSection"></div>
+    </div>
+
+    <button type="submit">Save Race</button>
+  </form>
+</div>
+
+<script>
+// CREW LIST
+function loadCrewList(){
+  let crew = JSON.parse(localStorage.getItem('crewList') || '[]');
+  let cDiv = document.getElementById('crewList');
+  cDiv.innerHTML = '';
+  crew.forEach(name=>{
+    let label=document.createElement('label');
+    let cb=document.createElement('input');
+    cb.type='checkbox';
+    cb.name='crewCheckbox';
+    cb.value=name;
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(' '+name));
+    cDiv.appendChild(label);
+  });
+}
+document.getElementById('addCrewBtn').onclick=()=>{
+  let name=document.getElementById('newCrewInput').value.trim();
+  if(!name) return;
+  let crew=JSON.parse(localStorage.getItem('crewList')||'[]');
+  if(!crew.includes(name)){
+    crew.push(name);
+    localStorage.setItem('crewList', JSON.stringify(crew));
+    loadCrewList();
+  }
+  document.getElementById('newCrewInput').value='';
+};
+
+// SAIL LIST
+function loadSailList(){
+  let sails=JSON.parse(localStorage.getItem('sailList') || '[]');
+  let sDiv=document.getElementById('sailList');
+  sDiv.innerHTML='';
+  sails.forEach((sail,idx)=>{
+    let row=document.createElement('div');
+    let label=document.createElement('label');
+    let cb=document.createElement('input');
+    cb.type='checkbox';
+    cb.name='sailCheckbox';
+    cb.value=sail.desc+'::'+sail.code;
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(` ${sail.desc} (${sail.code})`));
+    let remove=document.createElement('button');
+    remove.type='button';
+    remove.textContent='Remove';
+    remove.style.marginLeft='8px';
+    remove.onclick=()=>{
+      sails.splice(idx,1);
+      localStorage.setItem('sailList', JSON.stringify(sails));
+      loadSailList();
+    };
+    row.appendChild(label);
+    row.appendChild(remove);
+    sDiv.appendChild(row);
+  });
+}
+document.getElementById('addSailBtn').onclick=()=>{
+  let desc=document.getElementById('newSailDesc').value.trim();
+  let code=document.getElementById('newSailCode').value.trim();
+  if(!desc||!code) return;
+  let sails=JSON.parse(localStorage.getItem('sailList')||'[]');
+  if(sails.some(s=>s.desc===desc && s.code===code)){ alert('That sail already exists.'); return;}
+  sails.push({desc,code});
+  localStorage.setItem('sailList', JSON.stringify(sails));
+  loadSailList();
+  document.getElementById('newSailDesc').value='';
+  document.getElementById('newSailCode').value='';
+};
+
+// CURRENTS
+function renderCurrentsSection(){
+  const container=document.getElementById('currentsSection');
+  const types=['slack','ebb','flood'];
+  container.innerHTML='';
+  for(let i=1;i<=4;i++){
+    container.innerHTML += `
+      <div class="current-row">
+        <label>Entry ${i}:</label>
+        <input type="time" name="current_time_${i}">
+        <select name="current_type_${i}">
+          <option value="">--Type--</option>
+          ${types.map(t=>`<option value="${t}">${t}</option>`).join('')}
+        </select>
+        <input type="number" step="0.01" min="0" name="current_speed_${i}" placeholder="Speed (kts)">
+      </div>
+    `;
+  }
+}
+
+// FORM SUBMIT TO GOOGLE SHEETS
+document.getElementById('raceForm').onsubmit=async function(e){
+  e.preventDefault();
+  let data={};
+  Array.from(this.elements).forEach(el=>{
+    if(el.name && !['crewCheckbox','sailCheckbox'].includes(el.name)){
+      data[el.name]=el.value;
+    }
+  });
+  data.crew=Array.from(document.querySelectorAll('input[name="crewCheckbox"]:checked')).map(cb=>cb.value);
+  data.sailsUsed=Array.from(document.querySelectorAll('input[name="sailCheckbox"]:checked')).map(cb=>{
+    const [desc, code=''] = cb.value.split('::');
+    return `${desc} (${code})`;
+  });
+  data.currents=[];
+  for(let i=1;i<=4;i++){
+    let t=this[`current_time_${i}`].value;
+    let ty=this[`current_type_${i}`].value;
+    let s=this[`current_speed_${i}`].value;
+    if(t||ty||s) data.currents.push({time:t, type:ty, speed:s});
+  }
+
+  const webhookUrl="https://script.google.com/macros/s/AKfycbxhVe_kQVe8HwcOsuD3ncEuSbwMnwybWX_1Gu8CwIKX4ItYs3PxzoDk0NLhJHfHG5OL/exec";
+  try{
+    let resp=await fetch(webhookUrl,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    let resJson=await resp.json();
+    if(resJson.result==="success"){
+      alert("Race data saved to Google Sheets!");
+      this.reset();
+      loadCrewList(); loadSailList(); renderCurrentsSection();
+    } else {
+      alert("Error saving - check script permissions.");
+    }
+  }catch(err){
+    console.error(err);
+    alert("Failed to save to Google Sheets.");
+  }
+};
+
+// INIT ON PAGE LOAD
+document.addEventListener('DOMContentLoaded',()=>{
+  loadCrewList();
+  loadSailList();
+  renderCurrentsSection();
+});
+</script>
+
+</body>
+</html>
