@@ -227,7 +227,7 @@ document.getElementById('raceForm').onsubmit=async function(e){
     if(t||ty||s) data.currents.push({time:t, type:ty, speed:s});
   }
 
-  const webhookUrl="https://script.google.com/macros/s/AKfycbxhVe_kQVe8HwcOsuD3ncEuSbwMnwybWX_1Gu8CwIKX4ItYs3PxzoDk0NLhJHfHG5OL/exec";
+  const webhookUrl="https://script.google.com/macros/s/AKfycbwvL5rJ3Gzir_usT13PXSbMkTar-QkghIcKuuKjfZ3-SojrjGXeKltnJ6Mfg0_A-XMm/exec";
   try{
     let resp=await fetch(webhookUrl,{
       method:'POST',
