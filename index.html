@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sketch Race Truuker</title>
+  <title>Sketch Race Tracker</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -24,7 +24,7 @@
 <body>
 
 <div class="container">
-  <h1>Sketch Race Tracker</h1>
+  <h1>Sketch Race Trucker</h1>
   <form id="raceForm">
 
     <div class="section">
@@ -227,7 +227,7 @@ document.getElementById('raceForm').onsubmit=async function(e){
     if(t||ty||s) data.currents.push({time:t, type:ty, speed:s});
   }
 
-  const webhookUrl="https://script.google.com/macros/s/AKfycbwvL5rJ3Gzir_usT13PXSbMkTar-QkghIcKuuKjfZ3-SojrjGXeKltnJ6Mfg0_A-XMm/exec";
+  const webhookUrl="https://script.google.com/macros/s/AKfycbyTgo_JbMJKBjr8rbbmwm5k1hscKSDrJDzC_BAr2Z8WVuTO3hOpL87jpb_nH1_geKSd/exec";
   try{
     let resp=await fetch(webhookUrl,{
       method:'POST',
